@@ -15,7 +15,7 @@ module.exports = class LinterAda
     else
       parList = ["-f","-gnatef","-gnatc",editingFile]
 
-    atom_linter.exec("gnatmake.exe", parList, {cwd: cwd, stream: 'both'})
+    atom_linter.exec("gnatmake", parList, {cwd: cwd, stream: 'both'})
     .then (output) ->
       {stdout, stderr, exitCode} = output
       warnings = atom_linter.parse(stderr,regex).map((parsed) ->
