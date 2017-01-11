@@ -1,7 +1,7 @@
 {
   "name": "linter-ada",
   "main": "./lib/init",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Linter for Ada use GNATMake",
   "repository": "https://github.com/soiamsoNG/linter-ada",
   "license": "MIT",
