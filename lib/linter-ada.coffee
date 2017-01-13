@@ -11,8 +11,10 @@ module.exports = class LinterAda
 
     regex = '(?<file>.+):(?<line>\\d+):(?<col>\\d+):\\s(?<message>.+)'
     styleregex = '\\(style\\).*'
+    warningregex = 'warning.*'
     scs = atom.config.get('linter-ada.StyleCheckSwitch')
     scp = atom.config.get('linter-ada.StyleCheckParametersList')
+    wm = atom.config.get('linter-ada.WarningMode')
 
     # Find out the projectpath base one current editingFile
     [projectPath, relativePath] = atom.project.relativizePath(editingFile)
@@ -25,15 +27,15 @@ module.exports = class LinterAda
 
     #Check if need to do style check
     if scs == true
-      parList = ["-f","-F","-eS","-gnatef","-gnatc","-gnaty#{scp}"]
+      parList = ["-c","-f","-F","-eS","-gnatef","-gnatc","-gnatw#{wm}","-gnaty#{scp}"]
     else
-      parList = ["-f","-F","-eS","-gnatef","-gnatc"]
+      parList = ["-c","-f","-F","-eS","-gnatef","-gnatw#{wm}","-gnatc"]
 
     #Check if we have .gpr file in the project (atom's project idea) path
     #if we have .gpr then use the first one
     if gprfiles.length != 0
       firstGPR = gprfiles[0]
-      atom.notifications.addSuccess("LinterAda: Use #{firstGPR} for lint")
+      atom.notifications.addSuccess("LinterAda: Using #{firstGPR} for lint")
       parList = ["-P",firstGPR].concat parList
       parList = parList.concat efName
       gnatMakeRunPath = projectPath
@@ -44,7 +46,7 @@ module.exports = class LinterAda
       parList = parList.concat editingFile
       gnatMakeRunPath = cwd
 
-    atom_linter.exec("gnatmake", parList, {cwd:gnatMakeRunPath, stream: 'both'})
+    atom_linter.exec("gprbuild", parList, {cwd:gnatMakeRunPath, stream: 'both'})
     .then (output) ->
       {stdout, stderr, exitCode} = output
       warnings = atom_linter.parse(stderr,regex).map((parsed) ->
@@ -53,6 +55,8 @@ module.exports = class LinterAda
         col = message.range[0][1]
         message.range = [[line,col],[line,col]]
         if message.text.match(styleregex)
+          message.type = 'Warning'
+        else if message.text.match(warningregex)
           message.type = 'Warning'
         else
           message.type = 'Error'

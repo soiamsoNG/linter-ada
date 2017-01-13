@@ -9,6 +9,10 @@ module.exports =
     StyleCheckParametersList:
       type: 'string'
       default: '3abcefhiklmnprst'
+    WarningMode:
+      type: 'string'
+      description: 'This will use by warning mode which set by -gnatw in command line'
+      default: 'a'
 
   activate: ->
     require('atom-package-deps').install 'linter-ada'
