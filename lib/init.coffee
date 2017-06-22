@@ -25,5 +25,5 @@ module.exports =
     grammarScopes: ['source.ada','source.ads']
     scope: 'project'
     lint: @provider.lint
-    lintOnFly: false
+    lintsOnChange: false
     }

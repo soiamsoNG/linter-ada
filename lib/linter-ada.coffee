@@ -27,7 +27,8 @@ module.exports = class LinterAda
 
     #Check if need to do style check
     if scs == true
-      parList = ["-c","-f","-F","-eS","-gnatef","-gnatc","-gnatw#{wm}","-gnaty#{scp}"]
+      parList = ["-c","-f","-F","-eS",
+                  "-gnatef","-gnatc","-gnatw#{wm}","-gnaty#{scp}"]
     else
       parList = ["-c","-f","-F","-eS","-gnatef","-gnatw#{wm}","-gnatc"]
 
@@ -50,16 +51,20 @@ module.exports = class LinterAda
     .then (output) ->
       {stdout, stderr, exitCode} = output
       warnings = atom_linter.parse(stderr,regex).map((parsed) ->
-        message = Object.assign({},parsed)
-        line = message.range[0][0]
-        col = message.range[0][1]
-        message.range = [[line,col],[line,col]]
-        if message.text.match(styleregex)
-          message.type = 'Warning'
-        else if message.text.match(warningregex)
-          message.type = 'Warning'
+        message = {}
+        line = parsed.range[0][0]
+        col = parsed.range[0][1]
+        if parsed.text.match(styleregex)
+          message.severity = 'warning'
+        else if parsed.text.match(warningregex)
+          message.severity = 'warning'
         else
-          message.type = 'Error'
+          message.severity = 'error'
+        message.excerpt = parsed.text
+        message.location = {
+          file: parsed.filePath,
+          position: [[line,col],[line,col]]
+        }
         return message
         )
       return warnings
